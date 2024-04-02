@@ -5,7 +5,7 @@ use diesel::row::NamedRow;
 use diesel::{ExpressionMethods, QueryDsl, QueryResult, RunQueryDsl};
 use serde_json::Value;
 
-use crate::models::api_models::{Clue, Clues, CrosswordDto, CrosswordMetadata};
+use crate::models::api_models::{Clue, CrosswordDto, CrosswordMetadata};
 use crate::models::db_models::Crossword;
 use crate::models::errors::AppError;
 use crate::models::errors::AppError::InternalServerError;

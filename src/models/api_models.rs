@@ -28,8 +28,8 @@ pub struct SolutionItemDto {
 pub struct CrosswordDto {
     pub number_of_columns: i64,
     pub number_of_rows: i64,
-    pub grid: Vec<Cell>,
-    pub clues: Clues,
+    pub cells: Vec<Cell>,
+    pub clues: Vec<Clue>,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Queryable)]
@@ -41,16 +41,11 @@ pub struct ClueId {
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Queryable)]
 #[serde(rename_all = "camelCase")]
-pub struct Clues {
-    pub across: Vec<Clue>,
-    pub down: Vec<Clue>,
-}
-
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Queryable)]
-#[serde(rename_all = "camelCase")]
 pub struct Clue {
     pub number: i64,
-    pub value: String,
+    pub text: String,
+    pub direction: String,
+    pub length: Vec<i64>,
 }
 
 #[derive(PartialEq, Debug, Clone, Serialize, Deserialize)]
@@ -65,7 +60,7 @@ pub enum Cell {
     Black,
     #[serde(rename_all = "camelCase")]
     White {
-        cell_data: CellData,
+        number: Option<i64>,
     },
 }
 

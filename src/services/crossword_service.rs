@@ -10,7 +10,7 @@ use std::num::ParseIntError;
 use uuid::Uuid;
 
 use crate::models::api_models::Cell::{Black, White};
-use crate::models::api_models::{Cell, CellData, Clue, ClueId, Clues, CrosswordDto, Direction};
+use crate::models::api_models::{Cell, Clue, ClueId, CrosswordDto, Direction};
 use crate::models::db_models::Crossword;
 use crate::models::errors::AppError;
 use crate::models::guardian::{GuardianCrossword, GuardianDirection, GuardianEntry};
@@ -96,12 +96,14 @@ pub fn guardian_to_crossword_dto(guardian_crossword: GuardianCrossword) -> Cross
         .entries
         .into_iter()
         .partition(|n| n.direction == GuardianDirection::Across);
-    fn to_clues(entries: Vec<GuardianEntry>) -> Vec<Clue> {
+    fn to_clues(entries: Vec<GuardianEntry>, direction: String) -> Vec<Clue> {
         entries
             .iter()
             .map(|entry| Clue {
                 number: entry.number,
-                value: entry.clone().clue,
+                text: entry.clone().clue,
+                direction: direction.clone(),
+                length: vec![entry.length],
             })
             .collect()
     }
@@ -114,14 +116,15 @@ pub fn guardian_to_crossword_dto(guardian_crossword: GuardianCrossword) -> Cross
     let grid = (0..(guardian_crossword.dimensions.cols * guardian_crossword.dimensions.rows))
         .map(|x| get_cell(index_to_clue_items.get(&x)))
         .collect();
+
+    let mut clues = to_clues(down, "down".to_string());
+    let across_clues = to_clues(across, "across".to_string());
+    clues.append(&mut across_clues.clone());
     CrosswordDto {
         number_of_columns: guardian_crossword.dimensions.cols,
         number_of_rows: guardian_crossword.dimensions.rows,
-        grid,
-        clues: Clues {
-            across: to_clues(across),
-            down: to_clues(down),
-        },
+        cells: grid,
+        clues,
     }
 }
 
@@ -158,15 +161,7 @@ fn get_cell(clue_items: Option<&Vec<(ClueId, Option<i64>)>>) -> Cell {
             let number = first_clue
                 .and_then(|&(_, n)| n)
                 .or_else(|| second_clue.and_then(|&(_, n)| n));
-            first_clue
-                .map(|(clue_id, _)| White {
-                    cell_data: CellData {
-                        number,
-                        clue_id: clue_id.clone(),
-                        clue_id_2: second_clue.map(|(other, _)| other.clone()),
-                    },
-                })
-                .unwrap_or(Black)
+            first_clue.map(|_| White { number }).unwrap_or(Black)
         }
     }
 }
