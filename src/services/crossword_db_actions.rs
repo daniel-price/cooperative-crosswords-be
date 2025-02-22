@@ -46,20 +46,20 @@ pub async fn get_crossword_metadata_for_series(
     .await?
 }
 
-pub async fn get_crossword_for_series_and_id(
+pub async fn get_crossword_for_series_and_number(
     pool: web::Data<DbPool>,
-    id_for: String,
+    series_no_for: String,
     series_for: String,
 ) -> actix_web::Result<CrosswordDto, AppError> {
     // use web::block to offload blocking Diesel queries without blocking server thread
     let result: Value = web::block(move || {
         let mut conn = pool.get()?;
         crossword
-            .filter(id.eq(id_for.clone()))
+            .filter(series_no.eq(series_no_for.clone().parse::<i64>().unwrap()))
             .filter(series.eq(series_for))
             .select(crossword_json)
             .first(&mut conn)
-            .map_err(|_| AppError::CrosswordNotFound(id_for.clone()))
+            .map_err(|_| AppError::CrosswordNotFound(series_no_for.clone()))
     })
     .await??;
     let guardian_crossword: GuardianCrossword = serde_json::from_value(result)?;

@@ -7,7 +7,7 @@ pub struct GuardianCrossword {
     pub id: String,
     pub number: i64,
     pub name: String,
-    pub creator: GuardianCreator,
+    pub creator: Option<GuardianCreator>,
     pub date: i64,
     pub web_publication_date: i64,
     pub entries: Vec<GuardianEntry>,
@@ -15,7 +15,7 @@ pub struct GuardianCrossword {
     pub date_solution_available: i64,
     pub dimensions: Dimensions,
     pub crossword_type: String,
-    pub pdf: String,
+    pub pdf: Option<String>,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -37,7 +37,7 @@ pub struct GuardianEntry {
     pub group: Vec<String>,
     pub position: Position,
     pub separator_locations: SeparatorLocations,
-    pub solution: String,
+    pub solution: Option<String>,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]

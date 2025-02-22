@@ -75,7 +75,7 @@ impl StreamHandler<Result<ws::Message, ws::ProtocolError>> for WsSession {
             Ok(ws::Message::Continuation(_)) => {
                 ctx.stop();
             }
-            Ok(ws::Message::Nop) => (),
+            Ok(ws::Message::Nop) => {}
             Ok(ws::Message::Text(s)) => {
                 let value: Result<Vec<SolutionItemDto>, _> = serde_json::from_str(s.borrow());
                 match value {
@@ -83,10 +83,10 @@ impl StreamHandler<Result<ws::Message, ws::ProtocolError>> for WsSession {
                         solution_items,
                         sender: self.clone(),
                     }),
-                    Err(e) => println!("{}", e.to_string()),
+                    Err(e) => println!("Error handling text message: {:#?}", e),
                 }
             }
-            Err(e) => println!("{}", e.to_string()),
+            Err(e) => println!("Error handling stream: {:#?}", e),
         }
     }
 }
@@ -115,7 +115,6 @@ impl WsSession {
         ctx.run_interval(Duration::new(1, 0), |act, ctx| {
             // check client heartbeats
             if Instant::now().duration_since(act.hb) > Duration::new(10, 0) {
-                println!("Client heartbeat failed, disconnecting!");
                 act.server_addr
                     .do_send(ws_server::Disconnect { id: act.id });
                 ctx.stop();

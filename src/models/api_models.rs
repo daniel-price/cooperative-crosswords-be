@@ -16,6 +16,16 @@ pub struct CrosswordMetadata {
     pub date: i64,
 }
 
+#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize, Queryable)]
+#[serde(rename_all = "camelCase")]
+pub struct CrosswordMetadataWithHumanDate {
+    pub id: String,
+    pub series: String,
+    pub series_no: i64,
+    pub date: i64,
+    pub human_date: String,
+}
+
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct SolutionItemDto {
     pub x: i64,
@@ -30,6 +40,10 @@ pub struct CrosswordDto {
     pub number_of_rows: i64,
     pub cells: Vec<Cell>,
     pub clues: Vec<Clue>,
+    pub series: String,
+    pub series_no: String,
+    pub date: String,
+    pub setter: String,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Queryable)]
@@ -37,6 +51,7 @@ pub struct CrosswordDto {
 pub struct ClueId {
     pub number: i64,
     pub direction: Direction,
+    pub solution: Option<String>,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Queryable)]
@@ -46,6 +61,7 @@ pub struct Clue {
     pub text: String,
     pub direction: String,
     pub length: Vec<i64>,
+    pub solution: Option<String>,
 }
 
 #[derive(PartialEq, Debug, Clone, Serialize, Deserialize)]
@@ -61,6 +77,7 @@ pub enum Cell {
     #[serde(rename_all = "camelCase")]
     White {
         number: Option<i64>,
+        letter: String,
     },
 }
 
