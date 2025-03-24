@@ -26,13 +26,13 @@ pub async fn scrape_crossword(series: &str, id: String) -> Result<GuardianCrossw
     println!("Scraping {series} crossword: {id}",);
     let url = format!("https://www.theguardian.com/crosswords/{}/{}", series, id);
     let document = get_document(url).await?;
-    let selector = scraper::Selector::parse(".js-crossword")?;
+    let selector = scraper::Selector::parse("[name=CrosswordComponent]")?;
     let element = document.select(&selector).last();
     match element {
         Some(e) => {
             let json = e
                 .value()
-                .attr("data-crossword-data")
+                .attr("props")
                 .map_or(Err("No attribute found".to_string()), Ok)?;
             let result = serde_json::from_str(&json)?;
             Ok(result)
