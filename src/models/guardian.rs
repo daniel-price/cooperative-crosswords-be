@@ -3,6 +3,12 @@ use serde::Serialize;
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
+pub struct GuardianCrosswordData {
+    pub data: GuardianCrossword,
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct GuardianCrossword {
     pub id: String,
     pub number: i64,

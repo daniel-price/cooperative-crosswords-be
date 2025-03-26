@@ -15,7 +15,9 @@ use crate::models::api_models::Cell::{Black, White};
 use crate::models::api_models::{Cell, Clue, ClueId, CrosswordDto, Direction};
 use crate::models::db_models::Crossword;
 use crate::models::errors::AppError;
-use crate::models::guardian::{GuardianCrossword, GuardianDirection, GuardianEntry};
+use crate::models::guardian::{
+    GuardianCrossword, GuardianCrosswordData, GuardianDirection, GuardianEntry,
+};
 use crate::services::crossword_db_actions::{get_crossword_nos_for_series, store_crosswords};
 use crate::services::util::to_human_readable_date;
 use crate::DbPool;
@@ -34,8 +36,8 @@ pub async fn scrape_crossword(series: &str, id: String) -> Result<GuardianCrossw
                 .value()
                 .attr("props")
                 .map_or(Err("No attribute found".to_string()), Ok)?;
-            let result = serde_json::from_str(&json)?;
-            Ok(result)
+            let result: GuardianCrosswordData = serde_json::from_str(json)?;
+            Ok(result.data)
         }
         None => {
             println!("Failed to scrape {series} crossword: {id}",);
