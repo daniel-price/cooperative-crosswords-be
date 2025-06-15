@@ -1,4 +1,4 @@
-# fly.toml app configuration file generated for cooperative-crosswords-be on 2025-01-18T22:18:47Z
+# fly.toml app configuration file generated for cooperative-crosswords-be on 2025-06-15T12:34:54+01:00
 #
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
@@ -9,8 +9,8 @@ primary_region = 'lhr'
 [build]
 
 [env]
-  PORT = '8080'
   HOST_PORT = '0.0.0.0:8080'
+  PORT = '8080'
 
 [http_service]
   internal_port = 8080

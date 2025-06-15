@@ -104,10 +104,10 @@ async fn update_crosswords(pool: Data<DbPool>, path: Path<(String,)>) -> impl Re
     let series = path.into_inner().0;
     let page = 1;
     let result = services::crossword_service::update_crosswords(pool, &series, &page).await;
-    return match result {
+    match result {
         Ok(message) => HttpResponse::Ok().body(message),
         Err(error) => build_error_response(error),
-    };
+    }
 }
 
 #[get("/crossword/{series}/{seriesNo}")]
@@ -116,13 +116,13 @@ async fn get_crossword_data(pool: Data<DbPool>, path: Path<(String, String)>) ->
     let series = params.0;
     let series_no = params.1;
     let crossword_data = get_crossword_for_series_and_number(pool, series_no, series).await;
-    return match crossword_data {
+    match crossword_data {
         Ok(message) => serde_json::to_string(&message).map_or(
             HttpResponse::BadRequest().body("Couldn't parse crossword to a string"),
             |x| HttpResponse::Ok().body(x),
         ),
         Err(error) => build_error_response(error),
-    };
+    }
 }
 
 #[get("/crosswords")]
@@ -181,6 +181,7 @@ fn build_error_response(error: AppError) -> HttpResponse {
 
 fn initialize_db_pool() -> DbPool {
     let conn_spec = std::env::var("DATABASE_URL").expect("DATABASE_URL should be set");
+    println!("Connecting to database at: {}", conn_spec);
     let manager = r2d2::ConnectionManager::<PgConnection>::new(conn_spec);
     r2d2::Pool::builder()
         .build(manager)
