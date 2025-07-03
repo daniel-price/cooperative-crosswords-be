@@ -34,6 +34,13 @@ pub struct SolutionItemDto {
     pub modified_by: String,
 }
 
+#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct CurrentCellDto {
+    pub x: i64,
+    pub y: i64,
+    pub user: String,
+}
+
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Queryable)]
 #[serde(rename_all = "camelCase")]
 pub struct CrosswordDto {

@@ -5,7 +5,7 @@ use actix::prelude::*;
 use actix_web_actors::ws;
 use actix_web_actors::ws::WebsocketContext;
 
-use crate::models::api_models::SolutionItemDto;
+use crate::models::api_models::{SolutionItemDto, CurrentCellDto};
 use crate::services::ws_server;
 use crate::services::ws_server::{Move, MoveServer};
 use uuid::Uuid;
@@ -23,6 +23,7 @@ pub struct WsSession {
     pub user: String,
     pub team: String,
     pub crossword: String,
+    pub current_cell: Option<(i64, i64)>,
 }
 
 impl Actor for WsSession {
@@ -77,13 +78,27 @@ impl StreamHandler<Result<ws::Message, ws::ProtocolError>> for WsSession {
             }
             Ok(ws::Message::Nop) => {}
             Ok(ws::Message::Text(s)) => {
-                let value: Result<Vec<SolutionItemDto>, _> = serde_json::from_str(s.borrow());
-                match value {
-                    Ok(solution_items) => self.server_addr.do_send(Move {
-                        solution_items,
-                        sender: self.clone(),
-                    }),
-                    Err(e) => println!("Error handling text message: {:#?}", e),
+                // Try to parse as current cell message first
+                let current_cell_result: Result<CurrentCellDto, _> = serde_json::from_str(s.borrow());
+                match current_cell_result {
+                    Ok(current_cell) => {
+                        self.server_addr.do_send(ws_server::CurrentCell {
+                            x: current_cell.x,
+                            y: current_cell.y,
+                            sender: self.clone(),
+                        });
+                    }
+                    Err(_) => {
+                        // If not a current cell message, try to parse as move message
+                        let value: Result<Vec<SolutionItemDto>, _> = serde_json::from_str(s.borrow());
+                        match value {
+                            Ok(solution_items) => self.server_addr.do_send(Move {
+                                solution_items,
+                                sender: self.clone(),
+                            }),
+                            Err(e) => println!("Error handling text message: {:#?}", e),
+                        }
+                    }
                 }
             }
             Err(e) => println!("Error handling stream: {:#?}", e),
@@ -108,6 +123,7 @@ impl WsSession {
             user,
             team,
             crossword,
+            current_cell: None,
         }
     }
 
