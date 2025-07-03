@@ -67,5 +67,17 @@ pub async fn retrieve_and_send_solution(
     let solution_items = get_solution(pool, crossword_id, team_id)
         .await?
         .unwrap_or(Vec::new());
-    serde_json::to_string(&solution_items).map_err(|e| AppError::InternalServerError(e.to_string()))
+    
+    // Convert SolutionItem to SolutionItemDto with modified_by field
+    let solution_items_dto: Vec<SolutionItemDto> = solution_items
+        .into_iter()
+        .map(|item| SolutionItemDto {
+            x: item.x,
+            y: item.y,
+            value: item.value,
+            modified_by: item.modified_by,
+        })
+        .collect();
+    
+    serde_json::to_string(&solution_items_dto).map_err(|e| AppError::InternalServerError(e.to_string()))
 }

@@ -31,6 +31,7 @@ pub struct SolutionItemDto {
     pub x: i64,
     pub y: i64,
     pub value: String,
+    pub modified_by: String,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Queryable)]

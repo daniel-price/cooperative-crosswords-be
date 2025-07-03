@@ -48,10 +48,19 @@ impl MoveServer {
 
 impl MoveServer {
     fn broadcast_moves(&self, sender: WsSession, solution_items: Vec<SolutionItemDto>) {
+        // Add user information to each solution item
+        let solution_items_with_user: Vec<SolutionItemDto> = solution_items
+            .into_iter()
+            .map(|mut item| {
+                item.modified_by = sender.user.clone();
+                item
+            })
+            .collect();
+        
         for session in self.sessions.clone().into_iter() {
             let ws_session = session.1.session;
             if ws_session.crossword == sender.crossword && ws_session.team == sender.team {
-                let result = serde_json::to_string(&solution_items);
+                let result = serde_json::to_string(&solution_items_with_user);
                 match result {
                     Ok(message) => session.1.addr.do_send(ws_session::Message(message)),
                     Err(e) => println!("{}", e.to_string()),
