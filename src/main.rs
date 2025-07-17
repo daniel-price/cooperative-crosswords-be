@@ -33,6 +33,18 @@ async fn main() -> std::io::Result<()> {
     dotenv::dotenv().ok();
     let pool = initialize_db_pool();
     let server = MoveServer::new(pool.clone()).start();
+    
+    // Update all crosswords on startup
+    let pool_clone = pool.clone();
+    tokio::spawn(async move {
+        let result = update_all_crosswords_internal(web::Data::new(pool_clone)).await;
+        if result {
+            println!("Successfully updated all crosswords on startup");
+        } else {
+            println!("Some errors occurred while updating crosswords on startup");
+        }
+    });
+    
     HttpServer::new(move || {
         App::new()
             .wrap(Cors::default().allow_any_method().allow_any_origin())
@@ -76,8 +88,7 @@ async fn bulk_update_crosswords(pool: Data<DbPool>, data: web::Json<PostData>) -
     }
 }
 
-#[post("/update-all-crosswords")]
-async fn update_all_crosswords(pool: Data<DbPool>) -> impl Responder {
+async fn update_all_crosswords_internal(pool: Data<DbPool>) -> bool {
     let mut success = true;
     for series in ALL_SERIES.iter() {
         let page = 1;
@@ -91,6 +102,12 @@ async fn update_all_crosswords(pool: Data<DbPool>) -> impl Responder {
             }
         }
     }
+    success
+}
+
+#[post("/update-all-crosswords")]
+async fn update_all_crosswords(pool: Data<DbPool>) -> impl Responder {
+    let success = update_all_crosswords_internal(pool).await;
     let message = if success {
         "Successfully updated all crosswords"
     } else {
